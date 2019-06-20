@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
+import Layout from './Hoc/Layout';
 
-export class routes extends Component {
-    render() {
-        return (
-            <div>
-                asd
-            </div>
-        )
-    }
+
+const Routes = (props) => {
+    return (
+        <Layout>
+            second line
+        </Layout>
+    )
 }
 
-export default routes
+export default Routes;

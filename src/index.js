@@ -1,4 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './components/App';
-ReactDOM.render(<App/>, document.querySelector('#root'));
+import Routes from './routes';
+import './Resources/css/app.css'
+
+
+ReactDOM.render(<Routes/>, document.getElementById('root'));

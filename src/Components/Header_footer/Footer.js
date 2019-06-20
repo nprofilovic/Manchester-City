@@ -12,7 +12,7 @@ const Footer = () => {
                 />
             </div>
             <div className="footer_discl">
-                Manchester City 2018. All Rights Reserved.
+                Manchester City 2019. All Rights Reserved.
             </div>
         </footer>
     );

@@ -33,12 +33,12 @@ class AddPlayer extends Component {
                 validationMessage: '',
                 showlabel: true
             },
-            lastName: {
+            lastname: {
                 element:'input',
                 value: '',
                 config: {
                     label: 'Last Name',
-                    name: 'lastName_input',
+                    name: 'lastname_input',
                     type: 'text', 
                 },
                 validation: {
@@ -200,8 +200,8 @@ class AddPlayer extends Component {
                                 />
                             
                                 <FormField 
-                                    id={'lastName'}
-                                    formdata={this.state.formdata.lastName}
+                                    id={'lastname'}
+                                    formdata={this.state.formdata.lastname}
                                     change={(element)=> this.updateForm(element)}
                                 />
                             </div>

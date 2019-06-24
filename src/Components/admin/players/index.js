@@ -64,7 +64,7 @@ class AdminPlayers extends Component {
                                                 {player.position}
                                             </TableCell>
                                             <TableCell>
-                                                <Link to={`/admin_player/add_player/${player.id}`}>
+                                                <Link to={`/admin_players/add_player/${player.id}`}>
                                                     <button style={{background:'#98c5e9', color: '#ffffff'}} >Edit</button>
                                                  </Link>
                                             </TableCell>

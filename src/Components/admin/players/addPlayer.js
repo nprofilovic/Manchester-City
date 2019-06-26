@@ -1,174 +1,181 @@
-import React, { Component } from 'react'
-import AdminLayout from '../../../Hoc/AdminLayout'
+import React, { Component } from 'react';
+import AdminLayout from '../../../Hoc/AdminLayout';
 
-import FormField from '../../ui/formFields'
-import {validate} from '../../ui/misc'
-import {firebasePlayers, firebaseDB, firebase} from '../../../firebase'
-import {firebaseLooper} from '../../ui/misc'
-import FileUploader from '../../ui/fileuploader'
+import FormField from '../../ui/formFields';
+import { validate } from '../../ui/misc';
+
+import Fileuploader from '../../ui/fileuploader';
+import { firebasePlayers , firebaseDB, firebase } from '../../../firebase';
 
 class AddPlayer extends Component {
-    
+
     state = {
         playerId:'',
         formType:'',
         formError: false,
-        formSuccess: '',
-        defaultImg: '',
-        players:[],
-        formdata: {
-            name: {
+        formSuccess:'',
+        defaultImg:'',
+        formdata:{
+            name:{
                 element:'input',
-                value: '',
-                config: {
-                    label: 'First Name',
-                    name: 'name_input',
-                    type: 'text', 
+                value:'',
+                config:{
+                    label: 'Player Name',
+                    name:'name_input',
+                    type: 'text'
                 },
-                validation: {
-                    required: true,
-                    
-                },
-                valid: false,
-                validationMessage: '',
-                showlabel: true
-            },
-            lastname: {
-                element:'input',
-                value: '',
-                config: {
-                    label: 'Last Name',
-                    name: 'lastname_input',
-                    type: 'text', 
-                },
-                validation: {
-                    required: true,
-                    
-                },
-                valid: false,
-                validationMessage: '',
-                showlabel: true
-            },
-            
-            position: {
-                element:'select',
-                value: '',
-                config: {
-                    label: 'Select a position',
-                    name: 'select_position',
-                    type: 'select',
-                    options: [
-                        {key:'Keeper', value: 'Keeper'},
-                        {key:'Defence', value: 'Defence'},
-                        {key:'Midfield', value: 'Midfield'},
-                        {key:'Striker', value: 'Striker'},
-                    ] 
-                },
-                validation: {
-                    required: true,
-                    
-                },
-                valid: false,
-                validationMessage: '',
-                showlabel: true
-            },
-            number: {
-                element:'input',
-                value: '',
-                config: {
-                    label: 'Player Number',
-                    name: 'number_input',
-                    type: 'text', 
-                },
-                validation: {
-                    required: true,
-                    
-                },
-                valid: false,
-                validationMessage: '',
-                showlabel: true
-            },
-            image: {
-                element: 'image',
-                value: '',
-                validation: {
+                validation:{
                     required: true
                 },
-                valid: true
+                valid: false,
+                validationMessage:'',
+                showlabel: true
+            },
+            lastname:{
+                element:'input',
+                value:'',
+                config:{
+                    label: 'Player Last name',
+                    name:'lastname_input',
+                    type: 'text'
+                },
+                validation:{
+                    required: true
+                },
+                valid: false,
+                validationMessage:'',
+                showlabel: true
+            },
+            number:{
+                element:'input',
+                value:'',
+                config:{
+                    label: 'Player number',
+                    name:'number_input',
+                    type: 'text'
+                },
+                validation:{
+                    required: true
+                },
+                valid: false,
+                validationMessage:'',
+                showlabel: true
+            },
+            position:{
+                element:'select',
+                value:'',
+                config:{
+                    label: 'Select a position',
+                    name:'select_position',
+                    type: 'select',
+                    options: [
+                        {key:"Keeper",value:"Keeper"},
+                        {key:"Defence",value:"Defence"},
+                        {key:"Midfield",value:"Midfield"},
+                        {key:"Striker",value:"Striker"}
+                    ]
+                },
+                validation:{
+                    required: true
+                },
+                valid: false,
+                validationMessage:'',
+                showlabel: true
+            },
+            image:{
+                element:'image',
+                value:'',
+                validation:{
+                    required: true
+                },
+                valid:false
             }
         }
     }
 
-    componentDidMount() {
-        const playerId = this.props.match.params.id;
-        const getPlayers = (player, type) => {
-            firebasePlayers.once('value').then(snapshot=>{
-                const players = firebaseLooper(snapshot);
-                
-                
-                
-                this.updateFields(player, players, type, playerId);
+    updateFields = (player, playerId, formType , defaultImg) =>{
+        const newFormdata = { ...this.state.formdata}
 
-            })
+        for(let key in newFormdata){
+            newFormdata[key].value = player[key];
+            newFormdata[key].valid = true
         }
-        if(!playerId){
-            getPlayers(false, 'Add Player')
-        } else{
-            firebaseDB.ref(`players/${playerId}`).once('value')
-            .then((snapshot)=>{
-                const player = snapshot.val();
-                getPlayers(player, 'Edit Player')
-            })
-        }
-        
-        
+
+        this.setState({
+            playerId,
+            defaultImg,
+            formType,
+            formdata: newFormdata
+        })
     }
-    updateForm(element) {
-        const newFormdata = {...this.state.formdata}
-        const newElement = {...newFormdata[element.id]}
-        
-        newElement.value = element.e.target.value;
 
-        let valiData = validate(newElement)
-        newElement.valid = valiData[0];
-        newElement.validationMessage = valiData[1];
+
+    componentDidMount(){
+        const playerId = this.props.match.params.id;
+
+        if(!playerId){
+            this.setState({
+                formType:'Add player'
+            })
+        } else {
+           firebaseDB.ref(`players/${playerId}`).once('value')
+           .then(snapshot => {
+               const playerData = snapshot.val();
+
+                firebase.storage().ref('players')
+                .child(playerData.image).getDownloadURL()
+                .then( url => {
+                    this.updateFields(playerData,playerId,'Edit player',url)
+                }).catch( e => {
+                    this.updateFields({
+                        ...playerData,
+                        image:''
+                    },playerId,'Edit player','')
+                })
+           })
+        }
+
+    }
+
+
+    updateForm(element, content = ''){
+        const newFormdata = {...this.state.formdata}
+        const newElement = { ...newFormdata[element.id]}
+
+        if(content === ''){
+            newElement.value = element.event.target.value;
+        } else {
+            newElement.value = content
+        }
         
+        let validData = validate(newElement)
+        newElement.valid = validData[0];
+        newElement.validationMessage = validData[1]
 
         newFormdata[element.id] = newElement;
-        
-        this.setState({ formError: false, formdata: newFormdata });
+
+        this.setState({
+            formError: false,
+            formdata: newFormdata
+        })
     }
 
-    updateFields(player, players, type, playerId){
-        const newFormdata = {
-            ...this.state.formdata
-        }
-        for(let key in newFormdata){
-            if(player){
-                newFormdata[key].value = player[key];
-                newFormdata[key].valid = true;
-            } 
-            
-            
-        }
 
-        this.setState({ 
-            playerId,
-            formType: type,
-            formdata: newFormdata,
-            players
-          });
-    }
-
-    successForm(message) {
-        this.setState({ formSuccess: message });
+    successForm = (message) => {
+        this.setState({
+            formSuccess: message
+        });
         setTimeout(()=>{
-            this.setState({ formSuccess: '' }); 
-        }, 2000)
-    }
-    submitForm(e) {
-        e.preventDefault();
+            this.setState({
+                formSuccess:''
+            });
+        },2000)
 
+    }
+
+    submitForm(event){
+        event.preventDefault();
+        
         let dataToSubmit = {};
         let formIsValid = true;
 
@@ -176,98 +183,111 @@ class AddPlayer extends Component {
             dataToSubmit[key] = this.state.formdata[key].value;
             formIsValid = this.state.formdata[key].valid && formIsValid;
         }
-        
-        if(formIsValid) {
-            if(this.state.formType === 'Edit Player'){
+    
+        if(formIsValid){
+            if(this.state.formType === 'Edit player'){
                 firebaseDB.ref(`players/${this.state.playerId}`)
                 .update(dataToSubmit).then(()=>{
-                    this.successForm('Update correctly')
-                }).catch((e)=> {
-                    this.setState({ formError: true });
+                    this.successForm('Update correctly');
+                }).catch(e=>{
+                    this.setState({formError: true})
                 })
-        
             } else {
                 firebasePlayers.push(dataToSubmit).then(()=>{
-                    this.props.history.push('/admin_players');
-                }).catch((e)=>{
-                    this.setState({ formError: true });
+                    this.props.history.push('/admin_players')
+                }).catch(e=>{
+                    this.setState({
+                        formError: true
+                    })
                 })
             }
+           
+        } else {
+            this.setState({
+                formError: true
+            })
         }
-        
-        
     }
-    resetImage = () => {
 
+    resetImage = () => {
+        const newFormdata = {...this.state.formdata}
+        newFormdata['image'].value = '';
+        newFormdata['image'].valid = false;
+        
+        this.setState({
+            defaultImg:'',
+            formdata: newFormdata
+        })
     }
-    
+
+    storeFilename = (filename) => {
+        this.updateForm({id:'image'},filename)
+    }
+
     render() {
         return (
             <AdminLayout>
-               <div className="editplayers_dialog_wrapper">
+                <div className="editplayers_dialog_wrapper">
                     <h2>
                         {this.state.formType}
                     </h2>
-
                     <div>
-                        <form onSubmit={(e)=>this.submitForm(e)}>
-                            <FileUploader 
+                        <form onSubmit={(event)=> this.submitForm(event)}>
+            
+                            <Fileuploader
                                 dir="players"
                                 tag={"Player image"}
                                 defaultImg={this.state.defaultImg}
                                 defaultImgName={this.state.formdata.image.value}
-                                resetImage={() => this.resetImage()}
+                                resetImage={()=> this.resetImage()}
                                 filename={(filename)=> this.storeFilename(filename)}
                             />
-                            <div className="split_fields">
-                                <FormField 
-                                    id={'name'}
-                                    formdata={this.state.formdata.name}
-                                    change={(element)=> this.updateForm(element)}
-                                />
-                            
-                                <FormField 
-                                    id={'lastname'}
-                                    formdata={this.state.formdata.lastname}
-                                    change={(element)=> this.updateForm(element)}
-                                />
-                            </div>
 
-                            <div className="split_fields">
-                                <FormField 
-                                    id={'number'}
-                                    formdata={this.state.formdata.number}
-                                    change={(element)=> this.updateForm(element)}
-                                />
-                            </div>
-                            <div className="split_fields last">
-                         
-                                <FormField 
-                                    id={'position'}
-                                    formdata={this.state.formdata.position}
-                                    change={(element)=> this.updateForm(element)}
-                                />
-                            </div>
 
-                            
-                            <div className="success_label">{this.state.formSuccess}</div>
+                            <FormField
+                                id={'name'}
+                                formdata={this.state.formdata.name}
+                                change={(element)=> this.updateForm(element)}
+                                
+                            />
+
+                            <FormField
+                                id={'lastname'}
+                                formdata={this.state.formdata.lastname}
+                                change={(element)=> this.updateForm(element)}
+                            />
+
+                            <FormField
+                                id={'number'}
+                                formdata={this.state.formdata.number}
+                                change={(element)=> this.updateForm(element)}
+                            />
+
+                            <FormField
+                                id={'position'}
+                                formdata={this.state.formdata.position}
+                                change={(element)=> this.updateForm(element)}
+                            />
+
+                        <div className="success_label">{this.state.formSuccess}</div>
                             {this.state.formError ? 
-                                <div className="error_label">Something is wrong</div>
-                            : ''
+                                <div className="error_label">
+                                    Something is wrong
+                                </div>
+                                : ''
                             }
                             <div className="admin_submit">
-                                <button onClick={(e)=>this.submitForm(e)}>
+                                <button onClick={(event)=> this.submitForm(event)}>
                                     {this.state.formType}
                                 </button>
                             </div>
-                           
-
                         </form>
+
                     </div>
-               </div>
+                </div>
             </AdminLayout>
-        )
+        );
     }
 }
 
-export default AddPlayer
+export default AddPlayer;

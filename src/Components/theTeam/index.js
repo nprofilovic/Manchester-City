@@ -19,7 +19,7 @@ export class TheTeam extends Component {
     componentDidMount() {
         firebasePlayers.once('value').then(snapshot => {
             const players = firebaseLooper(snapshot)
-            console.log(players);
+           
             
             let promises = [];
             for(let key in players){
@@ -41,11 +41,61 @@ export class TheTeam extends Component {
             
         })
     }
+
+
+    showplayersByCategory = (category) => (
+        this.state.players ?
+            this.state.players.map((player, i) => {
+                return player.position === category ?
+                    <Fade left delay={i*20} key={i}>
+                        <div className="item">
+                            <PlayerCard
+                                number={player.number}
+                                name={player.name}
+                                lastname={player.lastname}
+                                bck={player.url}
+                            />
+                        </div>
+                    </Fade>
+                :null
+            })
+        :null
+    )
     render() {
-        console.log(this.state.players);
+        
         return (
-            <div>
-                TheTeam
+            <div className="the_team_container"
+                style={{background: `url(${Stripes}) repeat`}}
+            >
+                {!this.state.loading ?
+                    <div>
+                        <div className="team_category_wrapper">
+                            <div className="title">Keepers</div>
+                            <div className="team_cards">
+                                {this.showplayersByCategory('Keeper')}
+                            </div>
+                        </div>
+                        <div className="team_category_wrapper">
+                            <div className="title">Defence</div>
+                            <div className="team_cards">
+                                {this.showplayersByCategory('Defence')}
+                            </div>
+                        </div>
+                        <div className="team_category_wrapper">
+                            <div className="title">Midfield</div>
+                            <div className="team_cards">
+                                {this.showplayersByCategory('Midfield')}
+                            </div>
+                        </div>
+                        <div className="team_category_wrapper">
+                            <div className="title">Strickers</div>
+                            <div className="team_cards">
+                                {this.showplayersByCategory('Striker')}
+                            </div>
+                        </div>
+                    </div>
+                :null
+                }
             </div>
         )
     }

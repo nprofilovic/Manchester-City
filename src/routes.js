@@ -30,7 +30,7 @@ const Routes = (props) => {
                 <PublicRoutes {...props } restricted={false} exact component={TheTeam} path="/the_team" />
                 <PublicRoutes {...props } restricted={false} exact component={TheMatches} path="/the_matches" />
                 <PublicRoutes {...props } restricted={true} exact component={SignIn} path="/sign_in" />
-                <PublicRoutes {...props } restricted={false} exact component={NotFound}  />
+                <PublicRoutes {...props } restricted={false} exact component={NotFound} />
 
             </Switch>
         </Layout>
